@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 0
+    path: Assets/Scenes/SampleScene.unity
+    guid: 2cda990e2423bbf4892e6590ba056729
+  - enabled: 1
+    path: Assets/Scenes/Main Menu.unity
+    guid: e8d4baee01dada844bc6a104c3cb4a98
+  - enabled: 1
+    path: Assets/Scenes/Car Racing.unity
+    guid: b4c568504641e0b488ba4b989c32e894
+  - enabled: 1
+    path: Assets/Scenes/Golf.unity
+    guid: bc81f4035ffe3294b812efe9745aaebf
+  - enabled: 1
+    path: Assets/Scenes/Knife Thrower.unity
+    guid: dea10b351f6050341895744035a53bf4
+  - enabled: 1
+    path: Assets/Scenes/Memory Game.unity
+    guid: 91400c2c583dca042bbe26c79bc65258
+  - enabled: 1
+    path: Assets/Scenes/Mini Soccer.unity
+    guid: 877ce565e6df405409e626d1836730fe
+  - enabled: 1
+    path: Assets/Scenes/Soccer Pool.unity
+    guid: 3fc8acdd13e6c734bafef6554d6fdbcd
+  - enabled: 1
+    path: Assets/Scenes/Tank Fight.unity
+    guid: 07f5e143dcbfd0541bc2fe528b130ee2
+  - enabled: 1
+    path: Assets/Scenes/Tanks.unity
+    guid: 9bdcb732bbdc1b347a7880b2bbefb04c
+  - enabled: 1
+    path: Assets/Scenes/Tennis.unity
+    guid: 6d314cd0f1045cd42a76a0f831a087ce
+  - enabled: 1
+    path: Assets/Scenes/Brick Breaker.unity
+    guid: e73d02aaa3455614bbe269763eb34013
+  m_configObjects:
+    com.unity.adaptiveperformance.google.android.provider_settings: {fileID: 11400000, guid: cc050be3afe35d94d832ca2988a534ec, type: 2}
+    com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: c2f6140f36666f5469946f1e9c1fc9cf, type: 2}
+    com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: 726d95065522bb24b93a8bdccde4cbb1, type: 2}
+    com.unity.input.settings: {fileID: 11400000, guid: cf99a4df7da3a9148a835dea5d974b49, type: 2}
+    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: c2fa6ec2b964a4c4abc89c0aa8d38c15, type: 3}
+  m_UseUCBPForAssetBundles: 0
