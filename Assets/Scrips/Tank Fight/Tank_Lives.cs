@@ -14,6 +14,7 @@ public class Game_Manager : MonoBehaviour
 
     private void Start()
     {
+        Utils.ChangeToLandScape();
         InitializeGame();
         blueScoreText.text = BlueTankLives.ToString();
         redScoreText.text = RedTankLives.ToString();
