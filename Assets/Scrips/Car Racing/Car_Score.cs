@@ -1,6 +1,11 @@
+using DG.Tweening;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem.OnScreen;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using TMPro;
+using UnityEngine.Splines.ExtrusionShapes;
 
 public class Car_Score : MonoBehaviour
 {
@@ -17,6 +22,7 @@ public class Car_Score : MonoBehaviour
 
     private bool blueCooldown = false;
     private bool redCooldown = false;
+
 
     void Start()
     {

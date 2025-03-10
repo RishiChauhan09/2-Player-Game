@@ -86,14 +86,16 @@ public class Game_Manager : MonoBehaviour
             if (BlueWinnerScreen) BlueWinnerScreen.SetActive(true);
             Manager_MainMenu.blueMainPoints++;
             AudioManager.instance.PlaySound("Finish");
+            Utils.ChangeToPortrait();
+            StartCoroutine(Utils.WaitAndLoadScene("Main Menu"));
         }
         else
         {
             if (RedWinnerScreen) RedWinnerScreen.SetActive(true);
             Manager_MainMenu.redMainPoints++;
             AudioManager.instance.PlaySound("Finish");
+            Utils.ChangeToPortrait();
+            StartCoroutine(Utils.WaitAndLoadScene("Main Menu"));
         }
-
-        StartCoroutine(Utils.WaitAndLoadScene("Main Menu"));
     }
 }

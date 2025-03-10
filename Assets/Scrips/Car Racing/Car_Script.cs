@@ -1,4 +1,6 @@
+using DG.Tweening;
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -10,88 +12,120 @@ public class Car_Script : MonoBehaviour
         Red
     }
 
+    [Header("Player Setup")]
     public PlayerSide playerSide;
+    public Transform bluePlayer;
+    public Transform redPlayer;
 
-    public Transform player;
-    public float speed = 5.0f;
-    private bool touchStart = false;
-    private Vector2 pointA;
-    private Vector2 pointB;
-
+    [Header("Joystick Setup")]
     public Transform circle;
     public Transform outerCircle;
     public Transform fixedJoystickPositionBlue;
     public Transform fixedJoystickPositionRed;
+    public float speed = 5.0f;
 
-    public Transform bluePlayer;
-    public Transform redPlayer;
-
+    private bool touchStart = false;
+    private Vector2 pointA;
+    private Vector2 pointB;
+    private int activeTouchId = -1;
     private bool isMoving = false;
+
+    [SerializeField] private GameObject CountDownBG;
+    [SerializeField] private TMP_Text CountDownText;
 
     void Start()
     {
-        StartCoroutine(GameStart());
-
         if (playerSide == PlayerSide.Blue)
         {
-            circle.transform.position = fixedJoystickPositionBlue.position;
-            outerCircle.transform.position = fixedJoystickPositionBlue.position;
+            circle.position = fixedJoystickPositionBlue.position;
+            outerCircle.position = fixedJoystickPositionBlue.position;
         }
-        else if (playerSide == PlayerSide.Red)
+        else
         {
-            circle.transform.position = fixedJoystickPositionRed.position;
-            outerCircle.transform.position = fixedJoystickPositionRed.position;
+            circle.position = fixedJoystickPositionRed.position;
+            outerCircle.position = fixedJoystickPositionRed.position;
         }
+
+        StartCoroutine(Countdown());
     }
 
     void Update()
     {
-        if (Touchscreen.current != null)
+        if (Touchscreen.current == null) return;
+
+        foreach (var touch in Touchscreen.current.touches)
         {
-            if (Touchscreen.current.primaryTouch.press.wasPressedThisFrame)
+            var phase = touch.phase.ReadValue();
+            int currentTouchId = touch.touchId.ReadValue();
+
+            if (activeTouchId == -1 && phase == UnityEngine.InputSystem.TouchPhase.Began)
             {
-                Vector2 touchPos = Touchscreen.current.primaryTouch.position.ReadValue();
-                Vector3 touchPosition = Camera.main.ScreenToWorldPoint(
-                    new Vector3(touchPos.x, touchPos.y, Mathf.Abs(Camera.main.transform.position.z))
+                Vector2 screenPos = touch.position.ReadValue();
+                Vector3 worldPos = Camera.main.ScreenToWorldPoint(
+                    new Vector3(screenPos.x, screenPos.y, Mathf.Abs(Camera.main.transform.position.z))
                 );
 
-                if (playerSide == PlayerSide.Blue &&
-                    Vector2.Distance(touchPosition, fixedJoystickPositionBlue.position) < outerCircle.GetComponent<CircleCollider2D>().radius)
+                Vector3 joystickPos = (playerSide == PlayerSide.Blue)
+                    ? fixedJoystickPositionBlue.position
+                    : fixedJoystickPositionRed.position;
+
+                float radius = outerCircle.GetComponent<CircleCollider2D>().radius;
+                if (Vector2.Distance(worldPos, joystickPos) < radius)
                 {
-                    pointA = touchPosition;
+                    activeTouchId = currentTouchId;
                     touchStart = true;
-                    circle.GetComponent<SpriteRenderer>().enabled = true;
-                    outerCircle.GetComponent<SpriteRenderer>().enabled = true;
-                }
-                else if (playerSide == PlayerSide.Red &&
-                    Vector2.Distance(touchPosition, fixedJoystickPositionRed.position) < outerCircle.GetComponent<CircleCollider2D>().radius)
-                {
-                    pointA = touchPosition;
-                    touchStart = true;
+                    pointA = worldPos;
+
                     circle.GetComponent<SpriteRenderer>().enabled = true;
                     outerCircle.GetComponent<SpriteRenderer>().enabled = true;
                 }
             }
 
-            if (Touchscreen.current.primaryTouch.press.isPressed)
+            if (activeTouchId == currentTouchId)
             {
-                if (touchStart)
+                if (phase == UnityEngine.InputSystem.TouchPhase.Moved ||
+                    phase == UnityEngine.InputSystem.TouchPhase.Stationary)
                 {
-                    Vector2 touchPos = Touchscreen.current.primaryTouch.position.ReadValue();
-                    Vector3 touchPosition = Camera.main.ScreenToWorldPoint(
-                        new Vector3(touchPos.x, touchPos.y, Mathf.Abs(Camera.main.transform.position.z))
+                    Vector2 screenPos = touch.position.ReadValue();
+                    Vector3 worldPos = Camera.main.ScreenToWorldPoint(
+                        new Vector3(screenPos.x, screenPos.y, Mathf.Abs(Camera.main.transform.position.z))
                     );
-                    pointB = touchPosition;
+                    pointB = worldPos;
                 }
-            }
-            else
-            {
-                touchStart = false;
+                else if (phase == UnityEngine.InputSystem.TouchPhase.Ended ||
+                         phase == UnityEngine.InputSystem.TouchPhase.Canceled)
+                {
+                    activeTouchId = -1;
+                    touchStart = false;
+                }
             }
         }
     }
 
-    private void FixedUpdate()
+    private IEnumerator Countdown()
+    {
+
+        CountDownBG.SetActive(true);
+        CountDownText.gameObject.SetActive(true);
+
+        AudioManager.instance.PlaySound("Game Start");
+        for (int i = 3; i > 0; i--)
+        {
+            CountDownText.text = i.ToString();
+
+            CountDownText.transform.localScale = Vector3.one * 1.2f;
+            CountDownText.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutCubic);
+
+            yield return new WaitForSeconds(.75f);
+        }
+        CountDownText.gameObject.SetActive(false);
+        CountDownBG.SetActive(false);
+
+        foreach (var touch in Touchscreen.current.touches) circle.GetComponent<SpriteRenderer>().enabled = false;
+        foreach (var touch in Touchscreen.current.touches) outerCircle.GetComponent<SpriteRenderer>().enabled = false;
+    }
+
+    void FixedUpdate()
     {
         if (touchStart)
         {
@@ -99,8 +133,7 @@ public class Car_Script : MonoBehaviour
             Vector2 direction = Vector2.ClampMagnitude(offset, 1.0f);
 
             MoveCharacter(direction);
-
-            circle.transform.position = new Vector2(pointA.x + direction.x, pointA.y + direction.y);
+            circle.position = pointA + direction;
         }
         else
         {
@@ -109,10 +142,7 @@ public class Car_Script : MonoBehaviour
 
             if (isMoving)
             {
-                if (playerSide == PlayerSide.Blue)
-                    AudioManager.instance.StopSound("Car Racer");
-                else if (playerSide == PlayerSide.Red)
-                    AudioManager.instance.StopSound("Car Racer");
+                AudioManager.instance.StopSound("Car Racer");
                 isMoving = false;
             }
         }
@@ -129,10 +159,7 @@ public class Car_Script : MonoBehaviour
         {
             if (!isMoving)
             {
-                if (playerSide == PlayerSide.Blue)
-                    AudioManager.instance.PlaySound("Car Racer");
-                else if (playerSide == PlayerSide.Red)
-                    AudioManager.instance.PlaySound("Car Racer");
+                AudioManager.instance.PlaySound("Car Racer");
                 isMoving = true;
             }
         }
@@ -140,10 +167,7 @@ public class Car_Script : MonoBehaviour
         {
             if (isMoving)
             {
-                if (playerSide == PlayerSide.Blue)
-                    AudioManager.instance.StopSound("Car Racer");
-                else if (playerSide == PlayerSide.Red)
-                    AudioManager.instance.StopSound("Car Racer");
+                AudioManager.instance.StopSound("Car Racer");
                 isMoving = false;
             }
         }
@@ -152,14 +176,9 @@ public class Car_Script : MonoBehaviour
 
         if (direction.sqrMagnitude > 0)
         {
-            float targetAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
             float offsetAngle = -90f;
-            currentPlayer.rotation = Quaternion.Euler(0, 0, targetAngle + offsetAngle);
+            currentPlayer.rotation = Quaternion.Euler(0, 0, angle + offsetAngle);
         }
-    }
-    IEnumerator GameStart()
-    {
-        AudioManager.instance.PlaySound("Game Start");
-        yield return new WaitForSecondsRealtime(3);
     }
 }
